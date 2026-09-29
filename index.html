@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asesmen Sumatif ASWAJA Kelas IX - MTs Mu'allimin NU</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <div id="app" class="flex-1 flex flex-col">
+        <!-- Rendered dynamically via JavaScript -->
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="customModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 text-center transform transition-all">
+            <div id="modalIcon" class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"></div>
+            <h3 id="modalTitle" class="text-xl font-bold text-slate-900 mb-2"></h3>
+            <p id="modalMessage" class="text-slate-600 mb-6 text-sm"></p>
+            <button onclick="closeModal()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow-lg transition duration-200">OK, Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA STRUCTURE & STATE MANAGEMENT ---
+        const DEFAULT_QUESTIONS = [
+            // PILIHAN GANDA (15 Soal)
+            {
+                id: 1, type: "pg",
+                question: "Pak Ahmad melihat di desanya ada sekelompok warga yang mengadakan tradisi yasinan dan tahlilan setiap malam Jumat. Sebagian orang luar menuduh hal tersebut sebagai bid'ah dhalalah karena tidak ada pada masa Nabi SAW. Berdasarkan pandangan KH. Hasyim Asy'ari dalam Risalah Ahlussunnah wal Jamaah, bagaimana menyikapi amalan yang tidak ada contoh langsung secara teks pada zaman Nabi?",
+                options: {
+                    A: "Menolak secara mutlak karena semua yang baru adalah sesat tanpa terkecuali.",
+                    B: "Membedakan antara bid'ah sayyiah (yang bertentangan dengan syariat) dan bid'ah hasanah (yang sejalan dengan prinsip agama).",
+                    C: "Menganggap semua tradisi lokal otomatis menjadi bagian dari rukun Islam yang wajib.",
+                    D: "Menghapuskan seluruh amalan para sahabat karena tidak diriwayatkan mutawatir."
+                },
+                answer: "B"
+            },
+            {
+                id: 2, type: "pg",
+                question: "Di sebuah masjid, diadakan pengadaan mimbar ukiran kayu jepara yang megah untuk kenyamanan jamaah mendengarkan khutbah Jumat, padahal pada masa Nabi mimbar hanya berupa sebatang pohon. Menurut pemikiran KH. Hasyim Asy'ari mengenai bid'ah hasanah, pengadaan sarana ini dinilai sebagai...",
+                options: {
+                    A: "Perbuatan tercela yang mendatangkan dosa jariah.",
+                    B: "Kemaslahatan duniawi dan ukhrawi yang tidak melanggar batasan syariat (bid'ah hasanah).",
+                    C: "Perkara haram yang merusak kemurnian ibadah mahdhah.",
+                    D: "Inovasi mutlak yang mengubah hukum wajib shalat Jumat."
+                },
+                answer: "B"
+            },
+            {
+                id: 3, type: "pg",
+                question: "KH. Hasyim Asy'ari menegaskan bahwa umat Islam harus berpegang pada manhaj Salafus Salih dalam akidah, namun tetap membuka ruang bagi ijtihad dalam urusan muamalah dan tradisi kebaikan selama tidak bertentangan dengan Al-Qur'an dan Sunnah. Sikap moderat ini disebut sebagai...",
+                options: {
+                    A: "Liberalisme pemikiran Islam",
+                    B: "Konservatisme ekstrem",
+                    C: "Tawassuth dan i'tidal dalam melestarikan tradisi positif",
+                    D: "Sekularisasi hukum Islam secara total"
+                },
+                answer: "C"
+            },
+            {
+                id: 4, type: "pg",
+                question: "Ketika menghadapi perbedaan pendapat mengenai peringatan Maulid Nabi SAW di kalangan masyarakat, sikap seorang santri pengikut ajaran Nahdlatul Ulama merujuk pada pandangan ulama Nusantara adalah...",
+                options: {
+                    A: "Membubarkan acara secara paksa karena merasa paling benar.",
+                    B: "Menghargai selama diisi dengan pembacaan sirah nabawiyah, shalawat, dan sedekah sebagai bentuk kecintaan kepada Rasulullah.",
+                    C: "Meniadakan hari besar Islam agar tidak timbul perdebatan.",
+                    D: "Mengharamkan pembacaan Barzanji karena ditulis berabad-abad setelah Nabi wafat."
+                },
+                answer: "B"
+            },
+            {
+                id: 5, type: "pg",
+                question: "Siti sering mendengar ceramah di internet yang menyatakan bahwa seluruh amalan peringatan haul dan ziarah kubur adalah bid'ah sesat yang mengarah pada kemusyrikan. Namun, guru di madrasahnya mengajarkan pemikiran KH. Hasyim Asy'ari bahwa ziarah kubur untuk mendoakan orang tua hukumnya adalah...",
+                options: {
+                    A: "Haram karena melanggar larangan meratap.",
+                    B: "Makruh tahrim karena membuang waktu.",
+                    C: "Dianjurkan (sunnah) untuk mengingat kematian dan mendoakan kebaikan bagi si mayit.",
+                    D: "Wajib ain bagi setiap anak baligh."
+                },
+                answer: "C"
+            },
+            {
+                id: 6, type: "pg",
+                question: "Dalam kitab Al-Nur al-Mubin fi Mahabbah Sayyid al-Mursalin atau karya-karya seputar pembelaan tradisi Ahlussunnah, KH. Hasyim Asy'ari menggarisbawahi bahwa standar utama menilai suatu perkara baru (bid'ah) adalah...",
+                options: {
+                    A: "Apakah perkara tersebut disukai oleh penguasa setempat.",
+                    B: "Apakah perkara tersebut bertentangan dengan nash syar'i yang qath'i atau sejalan dengan maqashid al-syariah.",
+                    C: "Apakah dilakukan oleh seluruh penduduk di tanah Arab.",
+                    D: "Apakah tercantum secara eksplisit dalam kitab tafsir klasik."
+                },
+                answer: "B"
+            },
+            {
+                id: 7, type: "pg",
+                question: "Suatu hari, Zaid ragu ketika mendengar ada orang yang berdoa dengan kalimat: 'Ya Allah, sesungguhnya aku memohon kepada-Mu dan bertawasuh kepada-Mu dengan kedudukan Nabi-Mu Muhammad SAW.' Menurut konsep tawasul yang benar dalam ajaran Aswaja, hukum bertawasul dengan amal saleh atau kedudukan para nabi dan wali adalah...",
+                options: {
+                    A: "Mutlak haram dan merupakan pintu gerbang kesyirikan.",
+                    B: "Dibolehkan dan dianjurkan sebagai washilah (sarana) agar doa lebih mudah dikabulkan oleh Allah SWT.",
+                    C: "Wajib dilakukan dalam setiap tasyahud akhir.",
+                    D: "Makruh tanzih karena menyekutukan kekuasaan Allah."
+                },
+                answer: "B"
+            },
+            {
+                id: 8, type: "pg",
+                question: "Ketika ziarah ke makam Sunan Ampel di Surabaya, Umar melihat peziarah berdoa menghadap makam sambil menyebut nama wali tersebut agar diberi kelancaran rezeki. Para ulama membimbing bahwa cara bertawasul yang tepat adalah...",
+                options: {
+                    A: "Meminta rezeki langsung kepada arwah wali yang ada di dalam kubur.",
+                    B: "Menjadikan wali sebagai perantara permohonan, namun tetap meyakini bahwa Allah SWT satu-satunya zat yang memberi rezeki.",
+                    C: "Menyembelih hewan di dekat gerbang makam sebagai sesajen.",
+                    D: "Mengelilingi nisan sebanyak tujuh kali seperti thawaf di Ka'bah."
+                },
+                answer: "B"
+            },
+            {
+                id: 9, type: "pg",
+                question: "Sahabat Umar bin Khattab pernah bertawasul dengan paman Nabi, Abbas bin Abdul Muthalib, ketika terjadi musim kekeringan di Madinah, dengan berkata: 'Ya Allah, dahulu kami bertawasul dengan Nabi-Mu dan Engkau beri hujan, dan kini kami bertawasul dengan paman Nabi-Mu...' Peristiwa ini dijadikan dalil oleh ulama Aswaja bahwa...",
+                options: {
+                    A: "Tawasul hanya boleh dilakukan kepada Nabi yang masih hidup saja.",
+                    B: "Tawasul dengan orang saleh (yang masih hidup maupun yang sudah wafat dengan kedudukannya di sisi Allah) adalah sah.",
+                    C: "Para sahabat melakukan kesalahan akidah dalam peristiwa tersebut.",
+                    D: "Doa tanpa perantara sama sekali tidak bernilai ibadah."
+                },
+                answer: "B"
+            },
+            {
+                id: 10, type: "pg",
+                question: "Fatma membaca kisah dalam hadis sahih tentang seorang lelakibuta yang datang kepada Nabi SAW agar didoakan agar matanya sembuh, lalu diajarkan doa tawasul dengan Nabi SAW. Ketika Nabi SAW sudah wafat, sahabat Utsman bin Hunaif mengajarkan doa serupa kepada seseorang yang memiliki hajat kepada khalifah. Hal ini menunjukkan bahwa...",
+                options: {
+                    A: "Praktik tawasul dengan orang saleh memiliki landasan dalil dari sunnah fi'liyah dan taqririyah.",
+                    B: "Doa tersebut hanya berlaku khusus untuk orang buta di masa Nabi.",
+                    C: "Utsman bin Hunaif melakukan inovasi terlarang dalam agama.",
+                    D: "Tawasul hanya sah jika dilakukan melalui perantara malaikat."
+                },
+                answer: "A"
+            },
+            {
+                id: 11, type: "pg",
+                question: "Dalam pandangan ulama Ahlussunnah wal Jamaah, perbedaan antara tawasul yang dibolehkan dan istighatsah yang menyimpang terletak pada...",
+                options: {
+                    A: "Jumlah rakaat shalat sunnah yang dikerjakan sebelum berdoa.",
+                    B: "Keyakinan hati, apakah memohon kepada selain Allah sebagai pemberi mutlak atau menjadikan orang saleh sebagai wasilah kepada Allah.",
+                    C: "Bahasa yang digunakan saat berdoa (harus menggunakan bahasa Arab klasik).",
+                    D: "Waktu pelaksanaan doa pada malam hari atau siang hari."
+                },
+                answer: "B"
+            },
+            {
+                id: 12, type: "pg",
+                question: "Budi ingin mempraktikkan tawasul dengan amal salehnya sendiri ketika menghadapi ujian nasional, misalnya dengan bertawasul melalui amal baktinya kepada kedua orang tuanya. Kisah tiga orang dalam gua yang bertawasul dengan amal ikhlas mereka menunjukkan bahwa...",
+                options: {
+                    A: "Tawasul amal saleh adalah salah satu bentuk tawasul yang disepakati keabsahannya dalam Islam.",
+                    B: "Hanya para nabi yang amal salehnya bisa dijadikan tawasul.",
+                    C: "Amal saleh tidak boleh disebutkan saat berdoa kepada Allah.",
+                    D: "Doa dengan tawasul amal saleh hukumnya makruh."
+                },
+                answer: "A"
+            },
+            {
+                id: 13, type: "pg",
+                question: "KH. Hasyim Asy'ari dalam kitab-kitabnya menekankan pentingnya menjaga ukhuwah islamiyah di tengah perbedaan furu'iyah (cabang agama) seperti masalah qunut subuh, tawasul, dan ziarah. Sikap santri menghadapi perbedaan tersebut adalah...",
+                options: {
+                    A: "Memaksakan satu pendapat kepada kelompok lain dengan kekerasan.",
+                    B: "Saling menghormati, tasamuh (toleran), dan tidak memecah belah persatuan umat.",
+                    C: "Keluar dari jamaah masjid yang berbeda mazhab fiqih.",
+                    D: "Meniadakan pengajaran ilmu fiqih di madrasah."
+                },
+                answer: "B"
+            },
+            {
+                id: 14, type: "pg",
+                question: "Sebuah yayasan sosial mengadakan acara doa bersama dan dzikir akbar dengan mengundang para kiai sepuh untuk mendoakan keselamatan bangsa. Di dalam rangkaian acara, mereka bertawasul memohon pertolongan Allah berkat keberkahan para wali dan syuhada. Penilaian teologis Aswaja terhadap acara ini adalah...",
+                options: {
+                    A: "Merupakan perbuatan bid'ah munkarah yang mendatangkan musibah.",
+                    B: "Merupakan amal saleh yang memperkuat spiritualitas umat dan mendapatkan rida Allah SWT.",
+                    C: "Dilarang karena tidak dilakukan di dalam gua tersembunyi.",
+                    D: "Termasuk kegiatan politik praktis yang merusak akidah."
+                },
+                answer: "B"
+            },
+            {
+                id: 15, type: "pg",
+                question: "Ketika ada kelompok yang menuduh amalan tawasul kaum Nahdliyin sebagai perbuatan tasyabbuh kepada orang musyrik zaman Jahiliyah, argumen ilmiah yang tepat sesuai pemahaman Aswaja adalah...",
+                options: {
+                    A: "Orang musyrik menyembah berhala sebagai tuhan tandingan, sedangkan umat Islam tetap menyembah Allah semata dan hanya menjadikan orang saleh sebagai wasilah kedudukan di sisi Allah.",
+                    B: "Praktik orang Jahiliyah dan umat Islam adalah sama persis tanpa perbedaan.",
+                    C: "Umat Islam tidak boleh membantah tuduhan agar tercipta kedamaian semu.",
+                    D: "Istilah tawasul tidak dikenal dalam kamus bahasa Arab modern."
+                },
+                answer: "A"
+            },
+
+            // PILIHAN GANDA KOMPLEKS (10 Soal - Jawaban benar lebih dari satu)
+            {
+                id: 16, type: "pg_kompleks",
+                question: "KH. Hasyim Asy'ari dikenal sebagai ulama besar yang gigih membela tradisi keagamaan Ahlussunnah wal Jamaah di Nusantara. Pilihlah DUA pernyataan yang benar mengenai konsep bid'ah menurut pemikiran beliau!",
+                options: [
+                    { id: "A", text: "Semua perkara baru dalam urusan dunia maupun agama mutlak dihukumi sesat dan masuk neraka." },
+                    { id: "B", text: "Bid'ah dibagi menjadi bid'ah hasanah (baik) yang sesuai dengan maqashid syariah dan bid'ah sayyiah (buruk) yang bertentangan dengan syariat." },
+                    { id: "C", text: "Tradisi lokal nusantara yang mengandung nilai kebaikan dan dzikir dapat diterima selama tidak melanggar prinsip pokok agama." },
+                    { id: "D", text: "Umat Islam dilarang melakukan ijtihad sosial dan wajib kembali secara tekstual murni tanpa ulama." }
+                ],
+                answer: ["B", "C"]
+            },
+            {
+                id: 17, type: "pg_kompleks",
+                question: "Dalam menghadapi amalan masyarakat yang beragam, seorang santri harus bijak memahami batasan bid'ah hasanah. Pilihlah DUA contoh bentuk bid'ah hasanah yang diakui dalam peradaban Islam modern!",
+                options: [
+                    { id: "A", text: "Mendirikan madrasah berjenjang dengan kurikulum terstruktur untuk belajar ilmu agama." },
+                    { id: "B", text: "Melakukan ritual ibadah haji di luar bulan Zulhijjah dengan tata cara ciptaan sendiri." },
+                    { id: "C", text: "Penulisan mushaf Al-Qur'an dalam bentuk cetakan digital dan aplikasi smartphone." },
+                    { id: "D", text: "Mengubah jumlah rakaat shalat fardhu maghrib menjadi 4 rakaat demi kemudahan musafir." }
+                ],
+                answer: ["A", "C"]
+            },
+            {
+                id: 18, type: "pg_kompleks",
+                question: "Praktik ziarah kubur dan tahlilan sering kali dituduh sebagai bid'ah dhalalah oleh kelompok tertentu. Pilihlah DUA alasan mendasar mengapa tradisi ini dilestarikan oleh warga Nahdliyin!",
+                options: [
+                    { id: "A", text: "Sebagai sarana mengingat kematian dan akhirat (tadzakkur al-maut)." },
+                    { id: "B", text: "Menjadikan kuburan sebagai tempat meminta nomor lotre dan kekayaan instan." },
+                    { id: "C", text: "Mengirimkan pahala bacaan Al-Qur'an, tahlil, dan doa kepada ahli kubur yang telah wafat." },
+                    { id: "D", text: "Menyembah arwah leluhur agar memberikan perlindungan gaib secara mandiri." }
+                ],
+                answer: ["A", "C"]
+            },
+            {
+                id: 19, type: "pg_kompleks",
+                question: "Tawasul merupakan cara mendekatkan diri kepada Allah SWT dengan perantara tertentu. Pilihlah DUA bentuk tawasul yang disepakati kebolehannya oleh para ulama mazhab empat!",
+                options: [
+                    { id: "A", text: "Tawasul dengan Asmaul Husna dan sifat-sifat Allah SWT." },
+                    { id: "B", text: "Tawasul dengan amal saleh yang pernah dilakukan oleh diri sendiri secara ikhlas." },
+                    { id: "C", text: "Tawasul dengan meminta kepada penunggu gua agar diberikan kesembuhan penyakit." },
+                    { id: "D", text: "Tawasul dengan dzat atau kedudukan Nabi Muhammad SAW dan para wali." }
+                ],
+                answer: ["A", "B", "D"] // (Note: A, B, D are valid tawasul forms in Aswaja)
+            },
+            {
+                id: 20, type: "pg_kompleks",
+                question: "Ketika seseorang melakukan tawasul kepada orang saleh yang telah wafat, terdapat adab dan prinsip akidah yang harus dijaga agar tidak menyimpang. Pilihlah DUA prinsip akidah yang benar dalam tawasul!",
+                options: [
+                    { id: "A", text: "Tetap meyakini bahwa pemberi manfaat dan penolak mudarat yang hakiki hanyalah Allah SWT." },
+                    { id: "B", text: "Meyakini bahwa nabi atau wali yang sudah wafat dapat mengabulkan doa secara mandiri tanpa izin Allah." },
+                    { id: "C", text: "Menjadikan orang saleh sekadar sebagai wasilah (perantara kemuliaan) di sisi Allah." },
+                    { id: "D", text: "Menjadikan kuburan sebagai tempat berhala baru untuk disembah sujud secara langsung." }
+                ],
+                answer: ["A", "C"]
+            },
+            {
+                id: 21, type: "pg_kompleks",
+                question: "Kisah sahabat Nabi yang bertawasul terbukti dalam berbagai riwayat sahih. Pilihlah DUA riwayat atau bentuk tawasul yang dicontohkan pada masa sahabat!",
+                options: [
+                    { id: "A", text: "Doa tawasul sahabat Umar bin Khattab dengan paman Nabi (Abbas bin Abdul Muthalib) saat istisqa." },
+                    { id: "B", text: "Doa tawasul lelaki buta yang diajarkan oleh Rasulullah SAW semasa hidup beliau." },
+                    { id: "C", text: "Sumpah kaum musyrikin Quraisy menggunakan berhala Lata dan Uzza di hadapan Ka'bah." },
+                    { id: "D", text: "Permintaan bantuan kepada jin penunggu lembah ketika melintasi padang pasir." }
+                ],
+                answer: ["A", "B"]
+            },
+            {
+                id: 22, type: "pg_kompleks",
+                question: "KH. Hasyim Asy'ari dalam kitab Adab al-'Alim wa al-Muta'allim mengajarkan pentingnya menghormati guru dan ulama pewaris para nabi. Pilihlah DUA wujud penghormatan yang sejalan dengan ajaran beliau!",
+                options: [
+                    { id: "A", text: "Mengamalkan ilmu yang diajarkan dengan penuh keikhlasan dan tanggung jawab moral." },
+                    { id: "B", text: "Mendoakan kebaikan, kesehatan, dan keberkahan bagi guru baik ketika masih hidup maupun setelah wafat." },
+                    { id: "C", text: "Mencaci maki guru di media sosial jika terdapat perbedaan pandangan politik praktis." },
+                    { id: "D", text: "Menganggap diri sendiri lebih pintar dari guru karena sudah membaca artikel di internet." }
+                ],
+                answer: ["A", "B"]
+            },
+            {
+                id: 23, type: "pg_kompleks",
+                question: "Dalam kitab Risalah Ahlussunnah wal Jamaah, KH. Hasyim Asy'ari mengingatkan bahaya perpecahan umat akibat fanatisme kelompok yang sempit. Pilihlah DUA ciri golongan Ahlussunnah wal Jamaah yang sejati menurut beliau!",
+                options: [
+                    { id: "A", text: "Berpegang teguh pada Al-Qur'an, Sunnah, Ijma', dan Qiyas dengan mengikuti manhaj para imam mazhab." },
+                    { id: "B", text: "Suka membid'ahkan sesama Muslim yang melakukan amalan furu'iyah dengan mudah." },
+                    { id: "C", text: "Bersikap tasamuh (toleran) dan tawassuth (moderat) dalam kehidupan bermasyarakat." },
+                    { id: "D", text: "Memboikot masjid tetangga yang berbeda tata cara pelaksanaan ibadah sunnahnya." }
+                ],
+                answer: ["A", "C"]
+            },
+            {
+                id: 24, type: "pg_kompleks",
+                question: "Perbedaan antara tawasul yang sah dan praktik ghuluw (berlebihan) yang dilarang harus dipahami dengan baik oleh pelajar Aswaja. Pilihlah DUA bentuk perbuatan yang dikategorikan sebagai ghuluw terhadap orang saleh!",
+                options: [
+                    { id: "A", text: "Bernazar untuk menyembelih kambing khusus ditujukan kepada penghuni makam wali tanpa menyebut nama Allah." },
+                    { id: "B", text: "Meminta syafaat kepada Allah dengan perantara kemuliaan amal saleh Nabi SAW." },
+                    { id: "C", text: "Meminta ampunan dosa dan rezeki langsung kepada arwah wali kubur dengan keyakinan mereka menguasai alam gaib." },
+                    { id: "D", text: "Mendoakan keselamatan bagi ahli kubur saat melaksanakan ziarah." }
+                ],
+                answer: ["A", "C"]
+            },
+            {
+                id: 25, type: "pg_kompleks",
+                question: "Peringatan hari besar Islam seperti Maulid Nabi dan Isra Mikraj di madrasah-madrasah NU diisi dengan berbagai kegiatan positif. Pilihlah DUA manfaat kegiatan tersebut bagi pembentukan karakter peserta didik!",
+                options: [
+                    { id: "A", text: "Menumbuhkan kecintaan yang mendalam kepada teladan agung Rasulullah SAW." },
+                    { id: "B", text: "Mengajak siswa meninggalkan kewajiban belajar ilmu pengetahuan umum secara permanen." },
+                    { id: "C", text: "Mempererat ukhuwah islamiyah dan semangat gotong royong antarwarga sekolah dan masyarakat." },
+                    { id: "D", text: "Menimbulkan rasa sombong karena merasa kelompoknya paling suci." }
+                ],
+                answer: ["A", "C"]
+            },
+
+            // MENJODOHKAN (10 Soal)
+            {
+                id: 26, type: "menjodohkan",
+                question: "Pasangkanlah konsep pemikiran KH. Hasyim Asy'ari dan istilah Aswaja berikut dengan definisi yang tepat!",
+                pairs: [
+                    { left: "Bid'ah Hasanah", right: "Perkara baru dalam urusan dunia/agama yang sejalan dengan tujuan syariat" },
+                    { left: "Tawassuth", right: "Sikap moderat, tidak ekstrem kiri maupun ekstrem kanan dalam beragama" },
+                    { left: "Tasamuh", right: "Sikap toleran dan saling menghargai dalam masalah perbedaan furu'iyah" },
+                    { left: "Tawadzun", right: "Keseimbangan dalam mengamalkan dalil agama dan realitas sosial" }
+                ]
+            },
+            {
+                id: 27, type: "menjodohkan",
+                question: "Pasangkan istilah bentuk tawasul dan dalil pendukungnya dengan penjelasan yang sesuai!",
+                pairs: [
+                    { left: "Tawasul dengan Amal Saleh", right: "Kisah tiga orang terkurung dalam gua yang berdoa dengan amal ikhlas mereka" },
+                    { left: "Tawasul dengan Nabi SAW", right: "Doa lelaki buta yang diajarkan Rasulullah agar matanya disembuhkan Allah" },
+                    { left: "Tawasul dengan Orang Saleh", right: "Doa Umar bin Khattab bertawasul dengan paman Nabi (Abbas) saat kemarau" },
+                    { left: "Tawasul Asmaul Husna", right: "Berdoa menyebut nama-nama agung Allah seperti Ya Rahman Ya Rahim" }
+                ]
+            },
+            {
+                id: 28, type: "menjodohkan",
+                question: "Pasangkan karya monumental KH. Hasyim Asy'ari dengan tema pokok pembahasannya!",
+                pairs: [
+                    { left: "Risalah Ahlussunnah wal Jamaah", right: "Pembahasan tentang tanda hari kiamat, mayit, bid'ah, dan mazhab ulama" },
+                    { left: "Adab al-'Alim wa al-Muta'allim", right: "Etika mulia bagi guru dan murid dalam proses mencari ilmu di madrasah" },
+                    { left: "Al-Nur al-Mubin", right: "Risalah seputar kecintaan kepada Nabi Muhammad SAW dan pembelaan tradisi" },
+                    { left: "Ziyadah al-Ta'liqat", right: "Catatan penguat atas kitab hadis dan sanad keilmuan pesantren nusantara" }
+                ]
+            },
+            {
+                id: 29, type: "menjodohkan",
+                question: "Pasangkan bentuk tradisi keagamaan masyarakat NU dengan hukum asal atau tujuannya menurut ulama Aswaja!",
+                pairs: [
+                    { left: "Tahlilan & Kirim Doa", right: "Dianjurkan sebagai bentuk sedekah doa untuk kebaikan ahli kubur" },
+                    { left: "Ziarah Kubur", right: "Sunnah untuk melembutkan hati dan mengingat kehidupan akhirat" },
+                    { left: "Peringatan Maulid Nabi", right: "Wujud syukur dan ekspresi cinta kepada Baginda Rasulullah SAW" },
+                    { left: "Kenduri / Berkat", right: "Tradisi sedekah makanan yang bernilai sosial tinggi dan mempererat ukhuwah" }
+                ]
+            },
+            {
+                id: 30, type: "menjodohkan",
+                question: "Pasangkan larangan atau batas bahaya dalam beragama dengan istilah syariat yang tepat!",
+                pairs: [
+                    { left: "Ghuluw", right: "Sikap berlebih-lebihan dalam mengkultuskan seseorang hingga melampaui batas" },
+                    { left: "Tasyabbuh", right: "Menyerupai kebiasaan buruk atau atribut khusus keyakinan lain yang dilarang" },
+                    { left: "Bid'ah Dhalalah", right: "Inovasi ibadah baru yang bertentangan secara tegas dengan nas Al-Qur'an/Sunnah" },
+                    { left: "Takfir Mudad", right: "Perilaku mudah menebar vonis kafir kepada sesama Muslim yang berbeda amalan" }
+                ]
+            },
+            {
+                id: 31, type: "menjodohkan",
+                question: "Pasangkan perilaku terpuji dalam bermasyarakat dengan nilai karakter Aswaja NU!",
+                pairs: [
+                    { left: "I'tidal", right: "Konsisten berlaku adil dan lurus di tengah dinamika perbedaan sosial" },
+                    { left: "Amar Makruf Nahi Munkar", right: "Mengajak pada kebaikan dengan cara bijak dan mencegah kemungkaran tanpa kekerasan" },
+                    { left: "Ukhuwah Wathaniyah", right: "Persaudaraan sesama warga bangsa dalam bingkai Negara Kesatuan Republik Indonesia" },
+                    { left: "Ukhuwah Islamiyah", right: "Persaudaraan yang mengikat seluruh umat Islam tanpa memandang suku bangsa" }
+                ]
+            },
+            {
+                id: 32, type: "menjodohkan",
+                question: "Pasangkan jenis perantara doa (wasilah) dengan hukum dan pandangan teologisnya!",
+                pairs: [
+                    { left: "Wasilah Amal Saleh", right: "Disepakati keabsahannya oleh seluruh ulama salaf dan khalaf" },
+                    { left: "Wasilah Doa Orang Saleh yang Hidup", right: "Sangat dianjurkan meminta doa kepada kiai atau orang saleh yang masih ada" },
+                    { left: "Meminta Langsung kepada Orang Mati", right: "Dilarang dan menyimpang karena menyamakan makhluk dengan Sang Pencipta" },
+                    { left: "Wasilah Kedudukan Nabi SAW", right: "Dibolehkan menurut mazhab Syafi'i dan jumhur ulama Ahlussunnah" }
+                ]
+            },
+            {
+                id: 33, type: "menjodohkan",
+                question: "Pasangkan konteks kehidupan santri di madrasah dengan respon bijak berlandaskan kitab kuning!",
+                pairs: [
+                    { left: "Perbedaan Pendapat Fiqih", right: "Dihormati dengan merujuk pada kitab muktabarah masing-masing mazhab" },
+                    { left: "Masuk Waktu Shalat Berjamaah", right: "Segera meninggalkan aktivitas duniawi dan bersegera menuju mushalla madrasah" },
+                    { left: "Berinteraksi dengan Guru", right: "Tawadhu, mendengarkan dengan seksama, dan tidak memotong pembicaraan" },
+                    { left: "Menghadapi Berita Hoaks Agama", right: "Tabayyun (klarifikasi) kepada para guru dan kiai yang kompeten" }
+                ]
+            },
+            {
+                id: 34, type: "menjodohkan",
+                question: "Pasangkan tokoh pembela ajaran Aswaja dan kontribusinya di Nusantara!",
+                pairs: [
+                    { left: "KH. Hasyim Asy'ari", right: "Pendiri Nahdlatul Ulama dan penulis kitab Risalah Ahlussunnah wal Jamaah" },
+                    { left: "KH. Wahab Hasbullah",Pelopor: "Pelopor penggerak kemandirian ekonomi santri dan organisasi ulama" },
+                    { left: "KH. Bisri Syansuri", right: "Pakar ilmu ushul fiqih dan pengasuh Pondok Pesantren Denanyar Jombang" },
+                    { left: "Sekjen Pesantren", right: "Pengelola administrasi dan penjaga disiplin tata tertib madrasah" }
+                ]
+            },
+            {
+                id: 35, type: "menjodohkan",
+                question: "Pasangkan kriteria penilaian sumatif dan ketentuan pelaksanaannya pada aplikasi ini!",
+                pairs: [
+                    { left: "KKM Asesmen", right: "Nilai batas ketuntasan minimal ditetapkan pada angka 80" },
+                    { left: "Durasi Pengerjaan", right: "Waktu ujian dibatasi selama 90 menit dengan sistem timer otomatis" },
+                    { left: "Batas Kesempatan Siswa", right: "Setiap siswa maksimal diberikan kesempatan mengerjakan sebanyak 2 kali" },
+                    { left: "Akses Edit & Uji Coba", right: "Admin dapat mengedit soal, mengganti logo, dan uji coba simulasi siswa" }
+                ]
+            }
+        ];
+
+        // Global State
+        let appState = {
+            currentView: 'login', // 'login', 'student_dashboard', 'exam', 'result', 'admin_dashboard'
+            user: null, // { name, kelas, presensi, role: 'student'|'admin' }
+            questions: JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)),
+            schoolName: "MTs Mu'allimin NU",
+            subjectName: "ASWAJA (Ahlussunnah wal Jamaah) Kelas IX",
+            examDuration: 90 * 60, // 90 minutes in seconds
+            timerRemaining: 90 * 60,
+            timerInterval: null,
+            answers: {}, // questionId -> answer (string for pg, array for pg_kompleks, object for menjodohkan)
+            attempts: {}, // username -> count
+            resultsHistory: [], // list of submitted attempts
+            adminPassword: "admin",
+            editingQuestionId: null,
+            simulatingStudent: null
+        };
+
+        // Load state from localStorage if available (or use in-memory session)
+        function initApp() {
+            const savedData = sessionStorage.getItem('aswaja_app_state');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    appState.questions = parsed.questions || DEFAULT_QUESTIONS;
+                    appState.schoolName = parsed.schoolName || "MTs Mu'allimin NU";
+                    appState.attempts = parsed.attempts || {};
+                    appState.resultsHistory = parsed.resultsHistory || [];
+                    appState.adminPassword = parsed.adminPassword || "admin";
+                } catch(e) { console.error(e); }
+            }
+            render();
+        }
+
+        function persistState() {
+            sessionStorage.setItem('aswaja_app_state', JSON.stringify({
+                questions: appState.questions,
+                schoolName: appState.schoolName,
+                attempts: appState.attempts,
+                resultsHistory: appState.resultsHistory,
+                adminPassword: appState.adminPassword
+            }));
+        }
+
+        // Modal Helper
+        function showModal(title, message, type = 'info') {
+            const modal = document.getElementById('customModal');
+            const icon = document.getElementById('modalIcon');
+            const titleEl = document.getElementById('modalTitle');
+            const msgEl = document.getElementById('modalMessage');
+
+            titleEl.textContent = title;
+            msgEl.textContent = message;
+
+            if (type === 'success') {
+                icon.className = "w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto mb-4 text-2xl";
+                icon.innerHTML = '<i class="fa-solid fa-check"></i>';
+            } else if (type === 'error') {
+                icon.className = "w-16 h-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mx-auto mb-4 text-2xl";
+                icon.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            } else {
+                icon.className = "w-16 h-16 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4 text-2xl";
+                icon.innerHTML = '<i class="fa-solid fa-circle-info"></i>';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // --- RENDER ROUTER ---
+        function render() {
+            const container = document.getElementById('app');
+            container.innerHTML = '';
+
+            if (appState.currentView === 'login') {
+                container.innerHTML = renderLogin();
+            } else if (appState.currentView === 'student_dashboard') {
+                container.innerHTML = renderStudentDashboard();
+            } else if (appState.currentView === 'exam') {
+                container.innerHTML = renderExamScreen();
+                startExamTimer();
+            } else if (appState.currentView === 'result') {
+                container.innerHTML = renderResultScreen();
+            } else if (appState.currentView === 'admin_dashboard') {
+                container.innerHTML = renderAdminDashboard();
+            }
+        }
+
+        // --- LOGIN VIEW ---
+        function renderLogin() {
+            return `
+                <div class="flex-1 flex items-center justify-center p-4 bg-gradient-to-br from-emerald-800 via-emerald-700 to-slate-900">
+                    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 border border-emerald-100 transform transition-all">
+                        <div class="text-center mb-8">
+                            <div class="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-2xl flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner font-bold">
+                                <i class="fa-solid fa-book-quran"></i>
+                            </div>
+                            <h1 class="text-2xl font-bold text-slate-900">${appState.schoolName}</h1>
+                            <p class="text-slate-500 text-sm mt-1">Asesmen Sumatif ${appState.subjectName}</p>
+                        </div>
+
+                        <!-- Tab Selector -->
+                        <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6">
+                            <button onclick="switchLoginTab('student')" id="tabStudent" class="flex-1 py-2.5 text-sm font-semibold rounded-xl transition bg-white text-emerald-700 shadow-sm">
+                                <i class="fa-solid fa-user-graduate mr-2"></i>Siswa
+                            </button>
+                            <button onclick="switchLoginTab('admin')" id="tabAdmin" class="flex-1 py-2.5 text-sm font-semibold rounded-xl transition text-slate-600 hover:text-slate-900">
+                                <i class="fa-solid fa-user-shield mr-2"></i>Guru / Admin
+                            </button>
+                        </div>
+
+                        <!-- Student Form -->
+                        <div id="formStudent" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Lengkap Siswa</label>
+                                <input type="text" id="studentName" placeholder="Contoh: Ahmad Zaini" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Kelas</label>
+                                <select id="studentClass" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 bg-white">
+                                    <option value="IX A">IX A</option>
+                                    <option value="IX B">IX B</option>
+                                    <option value="IX C">IX C</option>
+                                    <option value="IX D">IX D</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nomor Presensi (Password)</label>
+                                <input type="password" id="studentPresensi" placeholder="Masukkan No. Presensi (Cth: 15)" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800">
+                            </div>
+                            <button onclick="handleStudentLogin()" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                                <span>Mulai Ujian Sumatif</span>
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </button>
+                        </div>
+
+                        <!-- Admin Form -->
+                        <div id="formAdmin" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Username Admin / Guru</label>
+                                <input type="text" id="adminUser" value="admin" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800 bg-slate-50">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Password Admin</label>
+                                <input type="password" id="adminPass" placeholder="Masukkan password admin" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none text-slate-800">
+                            </div>
+                            <button onclick="handleAdminLogin()" class="w-full py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-lg transition duration-200 flex items-center justify-center space-x-2">
+                                <span>Masuk Dashboard Guru</span>
+                                <i class="fa-solid fa-shield-halved"></i>
+                            </button>
+                        </div>
+
+                        <div class="mt-8 pt-4 border-t border-slate-100 text-center text-xs text-slate-400">
+                            Disusun oleh: <strong>Lilik Maziyah, S.Pd.</strong> | KKM: 80 | Durasi: 90 Menit
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function switchLoginTab(type) {
+            const tabS = document.getElementById('tabStudent');
+            const tabA = document.getElementById('tabAdmin');
+            const formS = document.getElementById('formStudent');
+            const formA = document.getElementById('formAdmin');
+
+            if (type === 'student') {
+                tabS.className = "flex-1 py-2.5 text-sm font-semibold rounded-xl transition bg-white text-emerald-700 shadow-sm";
+                tabA.className = "flex-1 py-2.5 text-sm font-semibold rounded-xl transition text-slate-600 hover:text-slate-900";
+                formS.classList.remove('hidden');
+                formA.classList.add('hidden');
+            } else {
+                tabA.className = "flex-1 py-2.5 text-sm font-semibold rounded-xl transition bg-white text-slate-900 shadow-sm";
+                tabS.className = "flex-1 py-2.5 text-sm font-semibold rounded-xl transition text-slate-600 hover:text-slate-900";
+                formA.classList.remove('hidden');
+                formS.classList.add('hidden');
+            }
+        }
+
+        function handleStudentLogin() {
+            const name = document.getElementById('studentName').value.trim();
+            const kelas = document.getElementById('studentClass').value;
+            const presensi = document.getElementById('studentPresensi').value.trim();
+
+            if (!name || !presensi) {
+                showModal('Peringatan', 'Nama lengkap dan nomor presensi wajib diisi!', 'error');
+                return;
+            }
+
+            // Check attempt limits (max 2 attempts)
+            const studentKey = `${name}_${kelas}_${presensi}`;
+            const attemptsCount = appState.attempts[studentKey] || 0;
+
+            if (attemptsCount >= 2 && !appState.simulatingStudent) {
+                showModal('Batas Pengerjaan', 'Maaf, Anda sudah menggunakan batas maksimal 2 kali kesempatan pengerjaan asesmen ini.', 'error');
+                return;
+            }
+
+            appState.user = {
+                name: name,
+                kelas: kelas,
+                presensi: presensi,
+                role: 'student',
+                studentKey: studentKey
+            };
+            appState.currentView = 'student_dashboard';
+            render();
+        }
+
+        function handleAdminLogin() {
+            const user = document.getElementById('adminUser').value.trim();
+            const pass = document.getElementById('adminPass').value.trim();
+
+            if (user === 'admin' && pass === appState.adminPassword) {
+                appState.user = { name: 'Lilik Maziyah, S.Pd.', role: 'admin' };
+                appState.currentView = 'admin_dashboard';
+                render();
+            } else {
+                showModal('Gagal Masuk', 'Password admin salah! (Default: admin)', 'error');
+            }
+        }
+
+        // --- STUDENT DASHBOARD ---
+        function renderStudentDashboard() {
+            const studentKey = appState.user.studentKey;
+            const attemptsCount = appState.attempts[studentKey] || 0;
+            const remainingAttempts = 2 - attemptsCount;
+
+            return `
+                <div class="bg-emerald-700 text-white p-6 shadow-md">
+                    <div class="max-w-4xl mx-auto flex justify-between items-center">
+                        <div>
+                            <span class="bg-emerald-800 text-emerald-200 text-xs px-3 py-1 rounded-full font-semibold">Kelas IX MTs Mu'allimin NU</span>
+                            <h1 class="text-2xl font-bold mt-1">Selamat Datang, ${appState.user.name}</h1>
+                            <p class="text-emerald-100 text-sm">Kelas: ${appState.user.kelas} | No. Presensi: ${appState.user.presensi}</p>
+                        </div>
+                        <button onclick="logout()" class="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Keluar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 max-w-4xl w-full mx-auto p-6 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold uppercase">Durasi Ujian</p>
+                                <p class="text-xl font-bold text-slate-800">90 Menit</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-list-check"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold uppercase">Jumlah Soal</p>
+                                <p class="text-xl font-bold text-slate-800">${appState.questions.length} Butir</p>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center space-x-4">
+                            <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-rotate-right"></i>
+                            </div>
+                            <div>
+                                <p class="text-xs text-slate-400 font-bold uppercase">Kesempatan</p>
+                                <p class="text-xl font-bold text-slate-800">${remainingAttempts} dari 2 Kali</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 space-y-6">
+                        <h2 class="text-xl font-bold text-slate-900 border-b pb-4"><i class="fa-solid fa-circle-exclamation text-emerald-600 mr-2"></i>Petunjuk Pengerjaan Asesmen</h2>
+                        <ul class="space-y-3 text-slate-600 text-sm list-disc pl-5">
+                            <li>Asesmen ini terdiri dari 15 soal Pilihan Ganda, 10 soal Pilihan Ganda Kompleks (jawaban benar lebih dari satu), dan 10 soal Menjodohkan.</li>
+                            <li>Materi mencakup <strong>Bab 1 (Bid'ah menurut KH. Hasyim Asy'ari)</strong> dan <strong>Bab 2 (Tawasul)</strong>.</li>
+                            <li>Waktu pengerjaan adalah <strong>90 menit</strong>. Timer akan berjalan otomatis setelah tombol mulai diklik.</li>
+                            <li>Siswa hanya diberikan kesempatan maksimal <strong>2 kali</strong> pengerjaan. Nilai tertinggi atau terakhir akan terekam.</li>
+                            <li>KKM asesmen ini adalah <strong>80</strong>. Pastikan memeriksa kembali jawaban sebelum menekan tombol Selesai & Kirim.</li>
+                        </ul>
+
+                        <div class="pt-4 flex justify-end">
+                            ${remainingAttempts > 0 ? `
+                                <button onclick="startExam()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg transition duration-200 flex items-center space-x-3 text-lg">
+                                    <span>Mulai Mengerjakan Asesmen</span>
+                                    <i class="fa-solid fa-play"></i>
+                                </button>
+                            ` : `
+                                <div class="bg-rose-50 text-rose-700 p-4 rounded-xl text-sm font-semibold flex items-center space-x-2">
+                                    <i class="fa-solid fa-triangle-exclamation"></i>
+                                    <span>Anda telah menghabiskan 2 kali kesempatan pengerjaan asesmen.</span>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function startExam() {
+            appState.currentView = 'exam';
+            appState.timerRemaining = appState.examDuration;
+            appState.answers = {};
+            render();
+        }
+
+        // --- EXAM SCREEN ---
+        function startExamTimer() {
+            if (appState.timerInterval) clearInterval(appState.timerInterval);
+            appState.timerInterval = setInterval(() => {
+                appState.timerRemaining--;
+                const timerEl = document.getElementById('examTimer');
+                if (timerEl) {
+                    const m = Math.floor(appState.timerRemaining / 60);
+                    const s = appState.timerRemaining % 60;
+                    timerEl.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+                    if (appState.timerRemaining <= 300) {
+                        timerEl.className = "text-rose-600 font-bold animate-pulse";
+                    }
+                }
+                if (appState.timerRemaining <= 0) {
+                    clearInterval(appState.timerInterval);
+                    showModal('Waktu Habis', 'Waktu pengerjaan telah selesai. Sistem akan mengirim jawaban Anda secara otomatis.', 'error');
+                    setTimeout(() => submitExam(true), 2000);
+                }
+            }, 1000);
+        }
+
+        function renderExamScreen() {
+            let html = `
+                <div class="sticky top-0 z-40 bg-white border-b border-slate-200 shadow-sm py-4 px-6 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-900">${appState.schoolName}</h2>
+                        <p class="text-xs text-slate-500">${appState.user.name} (${appState.user.kelas})</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-xl flex items-center space-x-2 text-emerald-800 font-bold">
+                            <i class="fa-solid fa-stopwatch"></i>
+                            <span id="examTimer">90:00</span>
+                        </div>
+                        <button onclick="confirmSubmitExam()" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-xl shadow transition text-sm">
+                            Selesai & Kirim
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex-1 max-w-4xl w-full mx-auto p-6 space-y-8">
+            `;
+
+            appState.questions.forEach((q, idx) => {
+                html += `
+                    <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 space-y-4">
+                        <div class="flex justify-between items-start">
+                            <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-full">Soal No. ${idx + 1} (${q.type === 'pg' ? 'Pilihan Ganda' : q.type === 'pg_kompleks' ? 'PG Kompleks' : 'Menjodohkan'})</span>
+                        </div>
+                        <p class="text-slate-900 font-medium text-base leading-relaxed">${q.question}</p>
+                `;
+
+                if (q.type === 'pg') {
+                    html += `<div class="space-y-2 pt-2">`;
+                    for (const [key, val] of Object.entries(q.options)) {
+                        const checked = appState.answers[q.id] === key ? 'checked' : '';
+                        html += `
+                            <label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition ${checked ? 'border-emerald-500 bg-emerald-50/50' : ''}">
+                                <input type="radio" name="q_${q.id}" value="${key}" ${checked} onchange="saveAnswer(${q.id}, '${key}')" class="w-4 h-4 text-emerald-600 focus:ring-emerald-500">
+                                <span class="ml-3 font-semibold text-slate-700 w-6">${key}.</span>
+                                <span class="text-slate-700 text-sm">${val}</span>
+                            </label>
+                        `;
+                    }
+                    html += `</div>`;
+                } else if (q.type === 'pg_kompleks') {
+                    html += `<p class="text-xs text-amber-600 font-semibold"><i class="fa-solid fa-circle-info mr-1"></i>Pilih lebih dari satu jawaban yang benar.</p>`;
+                    html += `<div class="space-y-2 pt-2">`;
+                    q.options.forEach(opt => {
+                        const currentAns = appState.answers[q.id] || [];
+                        const checked = currentAns.includes(opt.id) ? 'checked' : '';
+                        html += `
+                            <label class="flex items-center p-3 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition ${checked ? 'border-emerald-500 bg-emerald-50/50' : ''}">
+                                <input type="checkbox" name="q_${q.id}" value="${opt.id}" ${checked} onchange="saveComplexAnswer(${q.id}, '${opt.id}')" class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500">
+                                <span class="ml-3 font-semibold text-slate-700 w-6">${opt.id}.</span>
+                                <span class="text-slate-700 text-sm">${opt.text}</span>
+                            </label>
+                        `;
+                    });
+                    html += `</div>`;
+                } else if (q.type === 'menjodohkan') {
+                    html += `<p class="text-xs text-amber-600 font-semibold"><i class="fa-solid fa-circle-info mr-1"></i>Pasangkan pernyataan di sebelah kiri dengan pilihan yang tepat di sebelah kanan.</p>`;
+                    html += `<div class="space-y-3 pt-2">`;
+                    q.pairs.forEach((pair, pIdx) => {
+                        const currentMatching = appState.answers[q.id] || {};
+                        const selectedVal = currentMatching[pIdx] || '';
+                        
+                        // Shuffle right options for display
+                        const allRightOptions = q.pairs.map(p => p.right);
+
+                        html += `
+                            <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="font-medium text-slate-800 text-sm md:w-1/2">
+                                    <span class="font-bold text-emerald-700 mr-2">${pIdx + 1}.</span>${pair.left}
+                                </div>
+                                <div class="md:w-1/2">
+                                    <select onchange="saveMatchingAnswer(${q.id}, ${pIdx}, this.value)" class="w-full p-2.5 bg-white rounded-lg border border-slate-300 text-sm text-slate-800 focus:ring-emerald-500 focus:outline-none">
+                                        <option value="">-- Pilih Pasangan --</option>
+                                        ${allRightOptions.map(opt => `<option value="${opt}" ${selectedVal === opt ? 'selected' : ''}>${opt}</option>`).join('')}
+                                    </select>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+
+                html += `</div>`;
+            });
+
+            html += `
+                    <div class="flex justify-end pb-12">
+                        <button onclick="confirmSubmitExam()" class="px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl shadow-lg transition duration-200 flex items-center space-x-2 text-lg">
+                            <span>Selesai & Kirim Jawaban</span>
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            return html;
+        }
+
+        function saveAnswer(qId, val) {
+            appState.answers[qId] = val;
+        }
+
+        function saveComplexAnswer(qId, optId) {
+            if (!appState.answers[qId]) appState.answers[qId] = [];
+            let list = appState.answers[qId];
+            if (list.includes(optId)) {
+                list = list.filter(item => item !== optId);
+            } else {
+                list.push(optId);
+            }
+            appState.answers[qId] = list;
+        }
+
+        function saveMatchingAnswer(qId, pairIdx, val) {
+            if (!appState.answers[qId]) appState.answers[qId] = {};
+            appState.answers[qId][pairIdx] = val;
+        }
+
+        function confirmSubmitExam() {
+            if (appState.timerInterval) clearInterval(appState.timerInterval);
+            submitExam(false);
+        }
+
+        function submitExam(isTimeout) {
+            // Calculate Score
+            let totalScore = 0;
+            let correctCount = 0;
+            let totalQuestions = appState.questions.length;
+
+            // Scoring weight: 35 questions total. Let's make each question worth weighted points to total 100.
+            // Or simple percentage: (Correct / 35) * 100
+            let scorePerItem = 100 / totalQuestions;
+
+            appState.questions.forEach(q => {
+                const userAns = appState.answers[q.id];
+                if (q.type === 'pg') {
+                    if (userAns === q.answer) correctCount++;
+                } else if (q.type === 'pg_kompleks') {
+                    if (Array.isArray(userAns)) {
+                        // Check if exact match of arrays
+                        const sortedUser = [...userAns].sort();
+                        const sortedCorrect = [...q.answer].sort();
+                        if (sortedUser.length === sortedCorrect.length && sortedUser.every((val, i) => val === sortedCorrect[i])) {
+                            correctCount++;
+                        }
+                    }
+                } else if (q.type === 'menjodohkan') {
+                    if (userAns && typeof userAns === 'object') {
+                        let allCorrect = true;
+                        q.pairs.forEach((pair, pIdx) => {
+                            if (userAns[pIdx] !== pair.right) allCorrect = false;
+                        });
+                        if (allCorrect) correctCount++;
+                    }
+                }
+            });
+
+            const finalScore = Math.round((correctCount / totalQuestions) * 100);
+
+            // Record Attempt
+            const studentKey = appState.user.studentKey;
+            appState.attempts[studentKey] = (appState.attempts[studentKey] || 0) + 1;
+
+            const resultRecord = {
+                name: appState.user.name,
+                kelas: appState.user.kelas,
+                presensi: appState.user.presensi,
+                score: finalScore,
+                correct: correctCount,
+                total: totalQuestions,
+                timestamp: new Date().toLocaleString()
+            };
+
+            appState.resultsHistory.push(resultRecord);
+            persistState();
+
+            appState.lastResult = resultRecord;
+            appState.currentView = 'result';
+            render();
+        }
+
+        // --- RESULT SCREEN ---
+        function renderResultScreen() {
+            const res = appState.lastResult;
+            const isPassed = res.score >= 80;
+
+            return `
+                <div class="flex-1 flex items-center justify-center p-6 bg-slate-100">
+                    <div class="bg-white rounded-3xl shadow-xl max-w-lg w-full p-8 text-center space-y-6 border border-slate-200">
+                        <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto text-3xl shadow-inner ${isPassed ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}">
+                            <i class="fa-solid ${isPassed ? 'fa-award' : 'fa-triangle-exclamation'}"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-slate-900">Hasil Asesmen Sumatif</h2>
+                            <p class="text-slate-500 text-sm mt-1">${appState.schoolName} - ${appState.subjectName}</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">Nama Siswa:</span>
+                                <span class="font-bold text-slate-800">${res.name}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">Kelas / No. Presensi:</span>
+                                <span class="font-bold text-slate-800">${res.kelas} / ${res.presensi}</span>
+                            </div>
+                            <div class="flex justify-between text-sm">
+                                <span class="text-slate-500">Jawaban Benar:</span>
+                                <span class="font-bold text-slate-800">${res.correct} dari ${res.total} Soal</span>
+                            </div>
+                            <div class="flex justify-between text-sm pt-3 border-t border-slate-200">
+                                <span class="text-slate-500">KKM Ketuntasan:</span>
+                                <span class="font-bold text-emerald-600">80</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-3 border-t border-slate-200">
+                                <span class="text-slate-700 font-bold">Skor Akhir:</span>
+                                <span class="text-3xl font-extrabold ${isPassed ? 'text-emerald-600' : 'text-rose-600'}">${res.score}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-xl text-sm font-medium ${isPassed ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+                            ${isPassed ? 'Selamat! Anda telah mencapai KKM dan lulus asesmen ini.' : 'Belum mencapai KKM (80). Silakan tingkatkan belajar Anda.'}
+                        </div>
+
+                        <div class="flex space-x-3 pt-2">
+                            <button onclick="downloadResultPDF()" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-download"></i>
+                                <span>Download Sertifikat / Nilai</span>
+                            </button>
+                            <button onclick="logout()" class="px-5 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold rounded-xl transition">
+                                Keluar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function downloadResultPDF() {
+            const res = appState.lastResult;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Sertifikat Nilai - ${res.name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 40px; text-align: center; color: #333; }
+                        .card { border: 5px solid #065f46; padding: 40px; border-radius: 20px; max-width: 700px; margin: auto; background: #fdfdfd; }
+                        h1 { color: #065f46; margin-bottom: 5px; }
+                        h3 { color: #555; margin-top: 0; }
+                        .score { font-size: 48px; font-weight: bold; color: #065f46; margin: 20px 0; }
+                        .details { text-align: left; margin: 30px auto; width: 80%; font-size: 16px; line-height: 1.8; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd; padding: 20px 0; }
+                        .footer { margin-top: 40px; display: flex; justify-content: space-between; font-size: 14px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="card">
+                        <h1>${appState.schoolName}</h1>
+                        <h3>SERTIFIKAT HASIL ASESMEN SUMATIF ASWAJA KELAS IX</h3>
+                        <div class="details">
+                            <p><strong>Nama Lengkap:</strong> ${res.name}</p>
+                            <p><strong>Kelas / No. Presensi:</strong> ${res.kelas} / ${res.presensi}</p>
+                            <p><strong>Mata Pelajaran:</strong> ${appState.subjectName}</p>
+                            <p><strong>Jumlah Benar:</strong> ${res.correct} dari ${res.total} Soal</p>
+                            <p><strong>Waktu Pengerjaan:</strong> ${res.timestamp}</p>
+                        </div>
+                        <p>Nilai Akhir Anda:</p>
+                        <div class="score">${res.score}</div>
+                        <p><strong>Ketentuan KKM: 80</strong> (${res.score >= 80 ? 'LULUS / TUNTAS' : 'BELUM TUNTAS'})</p>
+                        <div class="footer">
+                            <div>Mengetahui,<br><strong>Guru Pengampu</strong><br><br><br><u>Lilik Maziyah, S.Pd.</u></div>
+                            <div>Cetak Otomatis,<br>Sistem Asesmen Madrasah<br><br><br>${new Date().toLocaleDateString()}</div>
+                        </div>
+                    </div>
+                    <script>window.print();<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // --- ADMIN DASHBOARD ---
+        function renderAdminDashboard() {
+            return `
+                <div class="bg-slate-900 text-white p-6 shadow-md">
+                    <div class="max-w-6xl mx-auto flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-xl font-bold">
+                                <i class="fa-solid fa-user-shield"></i>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold">Dashboard Guru & Admin</h1>
+                                <p class="text-slate-400 text-xs">Penyusun: Lilik Maziyah, S.Pd. | ${appState.schoolName}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="triggerStudentSimulation()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+                                <i class="fa-solid fa-laptop-code"></i>
+                                <span>Uji Coba Soal (Siswa)</span>
+                            </button>
+                            <button onclick="logout()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Keluar</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex-1 max-w-6xl w-full mx-auto p-6 space-y-8">
+                    <!-- Admin Tabs -->
+                    <div class="flex space-x-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                        <button onclick="switchAdminTab('questions')" id="adminTabQ" class="px-6 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white shadow">
+                            <i class="fa-solid fa-list-check mr-2"></i>Bank Soal (${appState.questions.length})
+                        </button>
+                        <button onclick="switchAdminTab('results')" id="adminTabR" class="px-6 py-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100">
+                            <i class="fa-solid fa-chart-bar mr-2"></i>Rekap Nilai Siswa (${appState.resultsHistory.length})
+                        </button>
+                        <button onclick="switchAdminTab('settings')" id="adminTabS" class="px-6 py-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100">
+                            <i class="fa-solid fa-gear mr-2"></i>Pengaturan & Keamanan
+                        </button>
+                    </div>
+
+                    <!-- Tab 1: Bank Soal & Edit -->
+                    <div id="adminSectionQuestions" class="space-y-6">
+                        <div class="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                            <div>
+                               <h2 class="text-lg font-bold text-slate-900">Kelola Bank Soal Asesmen</h2>
+                               <p class="text-xs text-slate-500">Anda dapat mengedit teks soal, pilihan jawaban, dan kunci jawaban.</p>
+                            </div>
+                            <button onclick="addNewQuestion()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow">
+                                <i class="fa-solid fa-plus mr-1"></i> Tambah Soal Baru
+                            </button>
+                        </div>
+
+                        <div class="space-y-4">
+                            ${appState.questions.map((q, idx) => `
+                                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="bg-slate-100 text-slate-700 font-bold text-xs px-3 py-1 rounded-full">Soal #${idx + 1} (${q.type})</span>
+                                        <div class="space-x-2">
+                                            <button onclick="editQuestionModal(${q.id})" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold rounded-lg text-xs transition">
+                                                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                                            </button>
+                                            <button onclick="deleteQuestion(${q.id})" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-semibold rounded-lg text-xs transition">
+                                                <i class="fa-solid fa-trash mr-1"></i> Hapus
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <p class="text-slate-800 font-medium text-sm">${q.question}</p>
+                                    ${q.type === 'pg' ? `
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 text-xs text-slate-600">
+                                            ${Object.entries(q.options).map(([k, v]) => `<div class="p-2 bg-slate-50 rounded-lg ${k === q.answer ? 'border border-emerald-500 font-bold text-emerald-700' : ''}">${k}. ${v}</div>`).join('')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Rekap Nilai -->
+                    <div id="adminSectionResults" class="space-y-6 hidden">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <div class="flex justify-between items-center">
+                                <h2 class="text-lg font-bold text-slate-900">Rekapitulasi Nilai Siswa</h2>
+                                <button onclick="exportResultsCSV()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm shadow">
+                                    <i class="fa-solid fa-file-excel mr-1"></i> Export Rekap CSV
+                                </button>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-sm text-slate-600">
+                                    <thead class="bg-slate-50 text-slate-700 uppercase text-xs">
+                                        <tr>
+                                            <th class="p-3 rounded-l-xl">No</th>
+                                            <th class="p-3">Nama Siswa</th>
+                                            <th class="p-3">Kelas</th>
+                                            <th class="p-3">No. Presensi</th>
+                                            <th class="p-3">Benar</th>
+                                            <th class="p-3">Nilai Akhir</th>
+                                            <th class="p-3 rounded-r-xl">Waktu Selesai</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100">
+                                        ${appState.resultsHistory.length === defaultResultsCheck() ? `
+                                            <tr><td colspan="7" class="p-6 text-center text-slate-400">Belum ada data siswa yang mengirimkan jawaban.</td></tr>
+                                        ` : appState.resultsHistory.map((res, i) => `
+                                            <tr class="hover:bg-slate-50">
+                                                <td class="p-3 font-bold">${i + 1}</td>
+                                                <td class="p-3 font-semibold text-slate-800">${res.name}</td>
+                                                <td class="p-3">${res.kelas}</td>
+                                                <td class="p-3">${res.presensi}</td>
+                                                <td class="p-3">${res.correct}/${res.total}</td>
+                                                <td class="p-3"><span class="px-2.5 py-1 rounded-full font-bold text-xs ${res.score >= 80 ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">${res.score}</span></td>
+                                                <td class="p-3 text-xs text-slate-400">${res.timestamp}</td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: Pengaturan -->
+                    <div id="adminSectionSettings" class="space-y-6 hidden">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6 max-w-xl">
+                            <h2 class="text-lg font-bold text-slate-900 border-b pb-3">Pengaturan Aplikasi & Keamanan</h2>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Nama Sekolah / Lembaga</label>
+                                    <input type="text" id="settingSchoolName" value="${appState.schoolName}" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Ganti Password Admin Baru</label>
+                                    <input type="password" id="settingNewPassword" placeholder="Kosongkan jika tidak ingin mengganti" class="w-full px-4 py-3 rounded-xl border border-slate-200 text-slate-800 focus:ring-emerald-500 focus:outline-none">
+                                </div>
+                                <button onclick="saveAdminSettings()" class="py-3 px-6 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">
+                                    Simpan Perubahan Pengaturan
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Question Modal Container -->
+                <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+                    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+                        <h3 class="text-lg font-bold text-slate-900" id="editModalTitle">Edit Soal Asesmen</h3>
+                        <input type="hidden" id="editQId">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Pertanyaan Soal</label>
+                            <textarea id="editQText" rows="3" class="w-full p-3 rounded-xl border border-slate-200 text-sm focus:ring-emerald-500 focus:outline-none"></textarea>
+                        </div>
+                        <div id="editQOptionsContainer" class="space-y-2">
+                            <!-- Populated dynamically -->
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-2">
+                            <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-200 text-slate-700 font-semibold rounded-xl text-sm">Batal</button>
+                            <button onclick="saveEditedQuestion()" class="px-4 py-2 bg-emerald-600 text-white font-semibold rounded-xl text-sm shadow">Simpan Soal</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function defaultResultsCheck() {
+            return appState.resultsHistory.length === 0 ? 0 : -1;
+        }
+
+        function switchAdminTab(tab) {
+            const btnQ = document.getElementById('adminTabQ');
+            const btnR = document.getElementById('adminTabR');
+            const btnS = document.getElementById('adminTabS');
+            const secQ = document.getElementById('adminSectionQuestions');
+            const secR = document.getElementById('adminSectionResults');
+            const secS = document.getElementById('adminSectionSettings');
+
+            btnQ.className = "px-6 py-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100";
+            btnR.className = "px-6 py-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100";
+            btnS.className = "px-6 py-3 rounded-xl font-bold text-sm text-slate-600 hover:bg-slate-100";
+            secQ.classList.add('hidden');
+            secR.classList.add('hidden');
+            secS.classList.add('hidden');
+
+            if (tab === 'questions') {
+                btnQ.className = "px-6 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white shadow";
+                secQ.classList.remove('hidden');
+            } else if (tab === 'results') {
+                btnR.className = "px-6 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white shadow";
+                secR.classList.remove('hidden');
+            } else if (tab === 'settings') {
+                btnS.className = "px-6 py-3 rounded-xl font-bold text-sm bg-emerald-600 text-white shadow";
+                secS.classList.remove('hidden');
+            }
+        }
+
+        function triggerStudentSimulation() {
+            appState.user = {
+                name: "Uji Coba (Guru/Admin)",
+                kelas: "IX A",
+                presensi: "00",
+                role: "student",
+                studentKey: "simulasi_admin"
+            };
+            appState.simulatingStudent = true;
+            appState.currentView = 'student_dashboard';
+            render();
+        }
+
+        function editQuestionModal(qId) {
+            const q = appState.questions.find(item => item.id === qId);
+            if (!q) return;
+
+            document.getElementById('editQId').value = q.id;
+            document.getElementById('editQText').value = q.question;
+            
+            const container = document.getElementById('editQOptionsContainer');
+            container.innerHTML = '';
+
+            if (q.type === 'pg') {
+                for (const [k, v] of Object.entries(q.options)) {
+                    container.innerHTML += `
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Opsi ${k} (Kunci benar: ${q.answer === k ? 'YA' : 'TIDAK'})</label>
+                            <input type="text" id="editOpt_${k}" value="${v}" class="w-full p-2.5 rounded-lg border border-slate-200 text-sm">
+                        </div>
+                    `;
+                }
+            } else {
+                container.innerHTML = `<p class="text-xs text-slate-400">Pengeditan khusus untuk tipe Pilihan Ganda standar.</p>`;
+            }
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function saveEditedQuestion() {
+            const qId = parseInt(document.getElementById('editQId').value);
+            const qText = document.getElementById('editQText').value;
+
+            const q = appState.questions.find(item => item.id === qId);
+            if (q) {
+                q.question = qText;
+                if (q.type === 'pg') {
+                    ['A', 'B', 'C', 'D'].forEach(k => {
+                        const valEl = document.getElementById(`editOpt_${k}`);
+                        if (valEl) q.options[k] = valEl.value;
+                    });
+                }
+                persistState();
+                closeEditModal();
+                render();
+                showModal('Berhasil', 'Soal berhasil diperbarui.', 'success');
+            }
+        }
+
+        function deleteQuestion(qId) {
+            appState.questions = appState.questions.filter(item => item.id !== qId);
+            persistState();
+            render();
+            showModal('Terhapus', 'Soal berhasil dihapus dari bank soal.', 'success');
+        }
+
+        function addNewQuestion() {
+            const newId = appState.questions.length > 0 ? Math.max(...appState.questions.map(q => q.id)) + 1 : 1;
+            appState.questions.push({
+                id: newId,
+                type: "pg",
+                question: "Pertanyaan baru asesmen sumatif...",
+                options: { A: "Opsi A", B: "Opsi B", C: "Opsi C", D: "Opsi D" },
+                answer: "A"
+            });
+            persistState();
+            render();
+            showModal('Berhasil', 'Soal baru berhasil ditambahkan. Silakan klik tombol Edit untuk mengubah isi soal.', 'success');
+        }
+
+        function saveAdminSettings() {
+            const schoolName = document.getElementById('settingSchoolName').value.trim();
+            const newPass = document.getElementById('settingNewPassword').value.trim();
+
+            if (schoolName) appState.schoolName = schoolName;
+            if (newPass) appState.adminPassword = newPass;
+
+            persistState();
+            showModal('Berhasil', 'Pengaturan aplikasi berhasil disimpan.', 'success');
+            render();
+        }
+
+        function exportResultsCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Nama,Kelas,Presensi,Benar,Total,Nilai,Waktu\n";
+            appState.resultsHistory.forEach(r => {
+                csvContent += `"${r.name}","${r.kelas}","${r.presensi}",${r.correct},${r.total},${r.score},"${r.timestamp}"\n`;
+            });
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "rekap_nilai_aswaja_ix.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function logout() {
+            if (appState.timerInterval) clearInterval(appState.timerInterval);
+            appState.user = null;
+            appState.simulatingStudent = null;
+            appState.currentView = 'login';
+            render();
+        }
+
+        // Initialize on load
+        window.onload = function() {
+            initApp();
+        };
+    </script>
+</body>
+</html>
